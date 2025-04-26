@@ -10,23 +10,33 @@ load_dotenv()
 api_key = os.getenv("DEEPSEEK_API_KEY")
 base_url = os.getenv("DEEPSEEK_API_URL")
 model = os.getenv("DEEPSEEK_MODEL_NAME")
+max_tokens = os.getenv("DEEPSEEK_MAX_TOKENS")
+temperature = os.getenv("DEEPSEEK_TEMPERATURE")
 
 # 初始化 DeepSeek API 客户端
-client = OpenAI(api_key=api_key, base_url=base_url, model=model)
+client = OpenAI(api_key=api_key, base_url=base_url)
 
 # 与 DeepSeek 聊天的函数
 def chat_with_deepseek(user_input):
     try:
         response = client.chat.completions.create(
-            model="deepseek-chat",
+            model=model,
+            max_tokens=max_tokens,
+            temperature=temperature,
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": user_input},
             ]
         )
         return response.choices[0].message.content
+    except OpenAI.AuthenticationError:
+        return "API认证失败，请检查API密钥"
+    except OpenAI.APIConnectionError:
+        return "网络连接错误，请检查网络"
+    except OpenAI.RateLimitError:
+        return "请求过于频繁，请稍后再试"
     except Exception as e:
-        return f"出错了: {e}"
+        return f"未知错误: {str(e)}"
 
 # 创建 Gradio 界面
 iface = gr.Interface(

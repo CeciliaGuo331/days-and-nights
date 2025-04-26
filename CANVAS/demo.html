@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Ink Demo</title>
+  <style>
+    body {
+      margin: 0;
+      height: 200vh;
+      background: linear-gradient(white, lightgray);
+    }
+    #inkCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 9999;
+      pointer-events: none;
+    }
+    #toolbar {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      background: white;
+      border: 1px solid gray;
+      border-radius: 6px;
+      padding: 5px 10px;
+      z-index: 10000;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="inkCanvas"></canvas>
+  <div id="toolbar">
+    <button id="toggleDraw">✏️ Draw</button>
+    <button id="clear">🗑️ Clear</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('inkCanvas');
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+    let enabled = false;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    canvas.addEventListener('pointerdown', e => {
+      if (!enabled) return;
+      drawing = true;
+      ctx.beginPath();
+      ctx.moveTo(e.clientX, e.clientY);
+    });
+
+    canvas.addEventListener('pointermove', e => {
+      if (!enabled || !drawing) return;
+      ctx.lineTo(e.clientX, e.clientY);
+      ctx.stroke();
+    });
+
+    window.addEventListener('pointerup', () => {
+      if (!enabled) return;
+      drawing = false;
+    });
+
+    document.getElementById('toggleDraw').addEventListener('click', () => {
+      enabled = !enabled;
+      canvas.style.pointerEvents = enabled ? 'auto' : 'none';
+    });
+
+    document.getElementById('clear').addEventListener('click', () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    });
+  </script>
+</body>
+</html>
